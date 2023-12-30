@@ -1,8 +1,22 @@
 export interface ICreateRoom {
-  socketId?: string;
-  status: string;
+  meetingName: string;
 }
 
-export interface ISampleResponse {
-  success: true;
+export interface IJoinRoom {
+  meetingId: string;
+  meetingName: string;
+}
+
+export interface IUser {
+  userId?: string;
+  name: string;
+  roomId: string;
+  createdAt?: string;
+  updatedAt?: string;
+  socketId: string;
+}
+
+export interface IGenerateResponse {
+  success: boolean;
+  message?: string;
 }
