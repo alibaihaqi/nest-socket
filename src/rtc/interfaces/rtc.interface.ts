@@ -1,5 +1,6 @@
 export interface ICreateRoom {
   meetingName: string;
+  isHostMeeting: boolean;
 }
 
 export interface IJoinRoom {
@@ -14,6 +15,7 @@ export interface IUser {
   createdAt?: string;
   updatedAt?: string;
   socketId: string;
+  isHostRoom?: boolean;
 }
 
 export interface IGenerateResponse {
