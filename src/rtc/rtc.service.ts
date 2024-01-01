@@ -26,6 +26,7 @@ export class RtcService {
         name: createUser.name,
         roomId: createUser.roomId,
         socketId: createUser.socketId,
+        isHostRoom: createUser.isHostRoom,
       },
       select: {
         roomId: true,
