@@ -1,5 +1,7 @@
 import {
+  OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -14,7 +16,9 @@ import { RtcService } from './rtc.service';
     origin: '*',
   },
 })
-export class RtcGateway implements OnGatewayDisconnect {
+export class RtcGateway
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
+{
   @WebSocketServer() server: Server;
 
   constructor(private readonly rtcService: RtcService) {}
@@ -51,6 +55,7 @@ export class RtcGateway implements OnGatewayDisconnect {
 
   @SubscribeMessage('join-room')
   async handleJoinRoom(client: Socket, payload: IJoinRoom): Promise<void> {
+    console.log('payload join room:', payload);
     await this.rtcService.insertSocketUser({
       name: payload.meetingName,
       roomId: payload.meetingId,
@@ -107,23 +112,33 @@ export class RtcGateway implements OnGatewayDisconnect {
       .emit('connection-init', initData);
   }
 
+  async handleConnection(client: any): Promise<void> {
+    client.emit('on gateway connection');
+  }
+
+  async afterInit(client: any): Promise<void> {
+    client.emit('on gateway init');
+  }
+
   async handleDisconnect(client: Socket): Promise<void> {
     const getUser = await this.rtcService.queryUserBySocketId(client.id);
 
-    await this.rtcService.removeUserByUserId(getUser.userId);
+    if (getUser) {
+      await this.rtcService.removeUserByUserId(getUser.userId);
 
-    client.leave(getUser.roomId);
+      client.leave(getUser.roomId);
 
-    const connectedUsers = await this.rtcService.queryUsersByRoomId(
-      getUser.roomId,
-    );
+      const connectedUsers = await this.rtcService.queryUsersByRoomId(
+        getUser.roomId,
+      );
 
-    this.server.volatile.to(getUser.roomId).emit('user-disconnected', {
-      socketId: client.id,
-    });
+      this.server.volatile.to(getUser.roomId).emit('user-disconnected', {
+        socketId: client.id,
+      });
 
-    this.server.volatile.to(getUser.roomId).emit('room-users', {
-      connectedUsers,
-    });
+      this.server.volatile.to(getUser.roomId).emit('room-users', {
+        connectedUsers,
+      });
+    }
   }
 }
