@@ -55,7 +55,6 @@ export class RtcGateway
 
   @SubscribeMessage('join-room')
   async handleJoinRoom(client: Socket, payload: IJoinRoom): Promise<void> {
-    console.log('payload join room:', payload);
     await this.rtcService.insertSocketUser({
       name: payload.meetingName,
       roomId: payload.meetingId,
