@@ -7,6 +7,13 @@ import { RtcService } from './rtc.service';
 export class RtcController {
   constructor(private readonly rtcService: RtcService) {}
 
+  @Get('/health')
+  checkHealth(): any {
+    return {
+      success: true,
+    };
+  }
+
   @Get('/room/:id')
   async checkIsRoomExist(
     @Param('id') roomId: string,
