@@ -23,7 +23,7 @@ export class RtcGateway
 
   constructor(private readonly rtcService: RtcService) {}
 
-  @SubscribeMessage('create-new-room')
+  @SubscribeMessage('create-room')
   async handleCreateNewRoom(
     client: Socket,
     payload: ICreateRoom,
@@ -77,13 +77,11 @@ export class RtcGateway
       if (user.socketId !== client.id) {
         const payload = { connectedUserSocketId: client.id };
 
-        this.server.volatile
-          .to(user.socketId)
-          .emit('connection-prepare', payload);
+        this.server.to(user.socketId).emit('connection-prepare', payload);
       }
     });
 
-    this.server.volatile.to(payload.meetingId).emit('room-users', {
+    this.server.to(payload.meetingId).emit('room-users', {
       connectedUsers,
     });
   }
@@ -95,7 +93,7 @@ export class RtcGateway
       connectedUserSocketId: client.id,
     };
 
-    this.server.volatile
+    this.server
       .to(payload.connectedUserSocketId)
       .emit('connection-signal', signalingData);
   }
@@ -106,7 +104,7 @@ export class RtcGateway
       connectedUserSocketId: client.id,
     };
 
-    this.server.volatile
+    this.server
       .to(payload.connectedUserSocketId)
       .emit('connection-init', initData);
   }
@@ -131,11 +129,11 @@ export class RtcGateway
         getUser.roomId,
       );
 
-      this.server.volatile.to(getUser.roomId).emit('user-disconnected', {
+      this.server.to(getUser.roomId).emit('user-disconnected', {
         socketId: client.id,
       });
 
-      this.server.volatile.to(getUser.roomId).emit('room-users', {
+      this.server.to(getUser.roomId).emit('room-users', {
         connectedUsers,
       });
     }
